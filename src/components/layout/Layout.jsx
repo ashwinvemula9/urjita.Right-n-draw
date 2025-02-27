@@ -28,15 +28,16 @@ const TOAST_CONFIG = {
     marginRight: "40px",
   },
   closeButton: (
-    <span
+    <div
       style={{
         cursor: "pointer",
         fontSize: "20px",
-        color: "#d9d9d9",
+        color: "red",
+        marginLeft: "70px",
       }}
     >
       &#10005;
-    </span>
+    </div>
   ),
 };
 

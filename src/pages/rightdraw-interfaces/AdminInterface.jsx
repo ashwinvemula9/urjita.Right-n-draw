@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { UserPlus, UserMinus, Settings, X } from "lucide-react";
+import { UserPlus, UserMinus, Settings, X, UserPen } from "lucide-react";
 import { authAPI } from "../../services/api/endpoints";
 import { toast } from "react-toastify";
 import { ChevronDown } from "lucide-react";
+import UsersTable from "./components/UsersTable";
 
 // Modal Component
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -399,10 +400,10 @@ const AdminInterface = () => {
       action: "remove-user",
     },
     {
-      title: "More Options Coming Soon",
-      description: "Configure system-wide settings and preferences.",
-      icon: Settings,
-      action: "settings",
+      title: "Modify User",
+      description: "Modify user data from the system.",
+      icon: UserPen,
+      action: "modify",
     },
   ];
 
@@ -442,25 +443,12 @@ const AdminInterface = () => {
 
       {/* Placeholder modals for other features */}
 
-      <Modal
-        isOpen={activeModal === "remove-user"}
-        onClose={() => setActiveModal(null)}
-        title="Remove User"
-      >
-        <p className="text-neutral-600">
-          User removal functionality coming soon...
-        </p>
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === "settings"}
-        onClose={() => setActiveModal(null)}
-        title="System Settings"
-      >
-        <p className="text-neutral-600">
-          Settings functionality coming soon...
-        </p>
-      </Modal>
+      {["remove-user", "modify"].includes(activeModal) && (
+        <UsersTable
+          setActiveModal={setActiveModal}
+          isEditFlow={activeModal === "modify"}
+        />
+      )}
     </div>
   );
 };

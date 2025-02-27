@@ -31,13 +31,6 @@ axiosInstance.interceptors.request.use(
 
 // Auth API
 export const authAPI = {
-  // Sample Request:
-  // {
-  //   "email": "test@gmail.com",
-  //   "password": "Vas272152!"
-  // }
-  // Sample Response:
-  // Returns JWT token on success
   login: async (credentials) => {
     try {
       const response = await axiosInstance.post("/auth/login/", credentials);
@@ -58,13 +51,6 @@ export const authAPI = {
     }
   },
 
-  // Sample Request:
-  // {
-  //   "email": "testing2@emaple.com",
-  //   "password": "xy1f2345",
-  //   "password2": "xy1f2345",
-  //   "role": "Approver"
-  // }
   register: async (userData) => {
     try {
       const response = await axiosInstance.post("/auth/register/", {
@@ -109,10 +95,6 @@ export const authAPI = {
     }
   },
 
-  // Sample Request:
-  // {
-  //   "email": "mahesh@gmail.com"
-  // }
   requestPasswordReset: async (payload) => {
     try {
       const response = await axiosInstance.post("auth/forgot-password/", {
@@ -126,26 +108,41 @@ export const authAPI = {
       throw new Error(errorMessage);
     }
   },
+
+  getUsersData: async () => {
+    try {
+      const res = await axiosInstance.get("auth/users/");
+      return res.data;
+    } catch (err) {
+      console.log(err);
+    }
+  },
+
+  deleteUser: async (userId) => {
+    try {
+      const res = await axiosInstance.delete(`auth/users/${userId}/`);
+      toast.success("Successfully deleted the user!");
+      return res;
+    } catch (err) {
+      toast.error("Failed to delete a user!");
+      console.log(err);
+    }
+  },
+
+  updateUser: async (userId, payload) => {
+    try {
+      const res = await axiosInstance.put(`auth/users/${userId}/`, payload);
+      toast.success("User edited successfully!");
+      return res;
+    } catch (err) {
+      toast.error("Failed to delete a user!");
+      console.log(err);
+    }
+  },
 };
 
 // PCB Specifications API
 export const pcbAPI = {
-  // Sample Response:
-  // [
-  //   {
-  //     "category_id": 1,
-  //     "category_name": "Dielectric Material Thickness",
-  //     "subcategories": [
-  //       {
-  //         "id": 1,
-  //         "name": "Alumina Ceramic",
-  //         "is_section_groupings_exists": true,
-  //         "is_sub_2_categories_exists": false
-  //       }
-  //     ]
-  //   },
-  //   ... additional categories
-  // ]
   getSpecification: async (id, designerOrverifier) => {
     const flag =
       designerOrverifier === "designer"
@@ -170,30 +167,6 @@ export const pcbAPI = {
     }
   },
 
-  // Sample Response:
-  // [
-  //   {
-  //     "id": 1,
-  //     "design_doc": "D3-E002",
-  //     "design_name": "Common Sections",
-  //     "rules": [
-  //       {
-  //         "id": 2,
-  //         "created_at": "2025-01-07T09:16:16.234817Z",
-  //         "updated_at": "2025-01-07T09:16:16.234817Z",
-  //         "design_doc": "D3-E002",
-  //         "rule_number": "4.1.2",
-  //         "parameter": "Following PCB material OAK, TLX, TLY, PTFE/Woven Glass/Ceramic NH9350,Ceramic RO3003 are NOT recommended for SMT design",
-  //         "min_value": 1,
-  //         "max_value": 10,
-  //         "nominal": 5,
-  //         "comments": "",
-  //         "created_by": 1,
-  //         "updated_by": 1
-  //       }
-  //     ]
-  //   }
-  // ]
   getSectionGroupings: async (id) => {
     try {
       const response = await axiosInstance.get(
@@ -223,27 +196,6 @@ export const pcbAPI = {
 
 // Components API
 export const componentsAPI = {
-  // Sample Response:
-  // [
-  //   {
-  //     "id": 1,
-  //     "created_at": "2025-01-07T09:06:51.520198Z",
-  //     "updated_at": "2025-01-07T09:06:51.520198Z",
-  //     "component_name": "B14",
-  //     "description": null,
-  //     "created_by": 1,
-  //     "updated_by": 1
-  //   },
-  //   {
-  //     "id": 2,
-  //     "created_at": "2025-01-07T10:20:05.692563Z",
-  //     "updated_at": "2025-01-07T10:20:05.692563Z",
-  //     "component_name": "F35",
-  //     "description": null,
-  //     "created_by": 1,
-  //     "updated_by": 1
-  //   }
-  // ]
   getAll: async () => {
     try {
       const response = await axiosInstance.get("/masters/components/");
@@ -255,16 +207,6 @@ export const componentsAPI = {
     }
   },
 
-  // Sample Response:
-  // {
-  //   "id": 2,
-  //   "created_at": "2025-01-07T10:20:05.692563Z",
-  //   "updated_at": "2025-01-07T10:20:05.692563Z",
-  //   "component_name": "F35",
-  //   "description": null,
-  //   "created_by": 1,
-  //   "updated_by": 1
-  // }
   getById: async (id) => {
     try {
       const response = await axiosInstance.get(`/masters/components/${id}/`);
@@ -323,22 +265,6 @@ export const cadAPI = {
     }
   },
 
-  // Sample Request:
-  // {
-  //   "oppNumber": "123",
-  //   "opuNumber": "123",
-  //   "eduNumber": "123",
-  //   "modelName": "cc",
-  //   "partNumber": "112",
-  //   "component": 1,
-  //   "revisionNumber": 123,
-  //   "componentSpecifications": {
-  //     "1": "1",
-  //     "2": "3",
-  //     "3": "5"
-  //   },
-  //   "designOptions": ["1", "2"]
-  // }
   createTemplate: async (templateData) => {
     try {
       const response = await axiosInstance.post(

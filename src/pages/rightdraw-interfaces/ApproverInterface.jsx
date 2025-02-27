@@ -288,9 +288,9 @@ const ApproverInterface = () => {
       await approverAPI.submitApproverTemplate(submitData);
       setActionType("rejected");
       setShowSuccessModal(true);
+      handleExportPDF();
       setApprovalStatus({ verifyDesignFields: {}, verifiedQueryData: {} });
       setShowRejectionModal(false);
-      setRejectionComment("");
     } catch (error) {
       if (error.response?.data) {
         Object.values(error.response.data).forEach((messages) => {
@@ -331,8 +331,6 @@ const ApproverInterface = () => {
     return requiredFields.every((field) => formData[field]);
   };
 
-  console.log("templateData", templateData, rejectionComment);
-
   const { isDesignFieldsDataAvailable, isVerifiedQueryDataAvailable } =
     React.useMemo(() => {
       return {
@@ -345,8 +343,20 @@ const ApproverInterface = () => {
         ),
       };
     }, [templateData]);
+
+  React.useEffect(() => {
+    setApprovalComment("");
+    setRejectionComment("");
+  }, []);
+
   return (
-    <div className="min-h-screen bg-neutral-900 p-4 sm:p-8 md:p-16">
+    <div
+      className="bg-neutral-900"
+      style={{
+        minHeight: "calc(100vh - 80px)",
+        paddingTop: "25px",
+      }}
+    >
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 w-full max-w-7xl mx-auto">
         <div className="px-4 sm:px-6 md:px-8 py-6 border-b border-neutral-200">
           <h1 className="text-3xl font-display font-semibold text-neutral-900 text-center">
@@ -460,7 +470,10 @@ const ApproverInterface = () => {
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 gap-8">
+              <div
+                className="grid grid-cols-1 gap-8"
+                style={{ height: "calc(100vh - 350px)", overflow: "auto" }}
+              >
                 <div className="border-2 border-red-200 rounded-lg p-6 bg-red-50">
                   <h2 className="text-xl font-semibold text-red-700 mb-4 flex items-center gap-2">
                     <AlertCircle className="w-6 h-6" />
