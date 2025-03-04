@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   itemValue: {
-    fontSize: 8,
+    fontSize: 9,
     color: "#374151",
   },
   pageNumber: {
@@ -208,7 +208,7 @@ const PDFDocumentVerifierInterface = ({
                 key={index}
                 style={[styles.resultItem, styles.deviatedItem]}
               >
-                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemName}>{item.name.replace(/Enter\s+(\w)/, (match, p1) => p1.toUpperCase())}</Text>
                 <Text style={styles.itemValue}>Value: {item.value}</Text>
               </View>
             ))}
@@ -235,8 +235,9 @@ const PDFDocumentVerifierInterface = ({
               <View
                 key={index}
                 style={[styles.resultItem, styles.compliantItem]}
-              >
-                <Text style={styles.itemName}>{item.name}</Text>
+              > 
+              {/* regex used to replace "Enter" and making next word 1st char into caps */}
+                <Text style={styles.itemName}>{item.name.replace(/Enter\s+(\w)/, (match, p1) => p1.toUpperCase())}</Text>  
                 <Text style={styles.itemValue}>Value: {item.value}</Text>
               </View>
             ))}

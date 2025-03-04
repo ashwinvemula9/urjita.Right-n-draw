@@ -104,6 +104,11 @@ const getErrorMessage = (specs) => {
   return null;
 };
 
+const checkErrorMsg = (value) => {
+  if(["RF Essential","Connectorized"].includes(value)) return "This option is for Verification Module only"
+  return null
+}
+
 // Simplify the PCBSpecifications component
 const PCBSpecifications = ({
   formData,
@@ -113,8 +118,9 @@ const PCBSpecifications = ({
   subCategoriesTwoSelections,
 }) => {
   const [subCategoriesTwo, setSubCategoriesTwo] = useState({});
+  const [catb14,setCatB14] = useState('')
 
-  const errorMessage = getErrorMessage(formData[STEPS.PCB_SPECS].selectedSpecs);
+  const errorMessage = getErrorMessage(formData[STEPS.PCB_SPECS].selectedSpecs) || checkErrorMsg(catb14);
 
   // Function to fetch sub-categories-two
   const fetchSubCategoriesTwo = async (subcategoryId) => {
@@ -184,7 +190,8 @@ const PCBSpecifications = ({
                     label: sub.name,
                   }))}
                   value={selectedSubcategoryId || ""}
-                  onChange={(value) => {
+                  onChange={(value,label) => {
+                    setCatB14(label)
                     handleFieldChange(STEPS.PCB_SPECS, "selectedSpecs", {
                       ...formData[STEPS.PCB_SPECS].selectedSpecs,
                       [spec.category_id]: Number(value),

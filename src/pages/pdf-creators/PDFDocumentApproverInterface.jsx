@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   itemValue: {
-    fontSize: 8,
+    fontSize: 9,
     color: "#374151",
   },
   status: {
@@ -329,7 +329,7 @@ const generatePDF = async (formData, templateData, actionType, userEmail) => {
   ).toBlob();
   saveAs(
     blob,
-    `PCB_Approval_${formData.partNumber}_${formData.revisionNumber}.pdf`
+    `PCB_${actionType === "approved" ? "Approved" : "Rejected"}_${formData.partNumber}_${formData.revisionNumber}.pdf`
   );
 };
 

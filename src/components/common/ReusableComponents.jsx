@@ -128,7 +128,9 @@ const Select = ({
         <select
           id={selectId}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value,e.target?.selectedOptions?.[0]?.innerText)
+          }}
           disabled={disabled}
           className={`
             w-full px-3 py-2 border rounded-md appearance-none

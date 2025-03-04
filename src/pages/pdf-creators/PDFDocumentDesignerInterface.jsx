@@ -158,6 +158,13 @@ const styles = StyleSheet.create({
   },
 });
 
+
+const metricValues = {
+  "Dielectric Thickness" : '(Inches)',
+  "Copper Thickness" : '(OZ)',
+  "B14 Size" : '(Inches)'
+}
+
 const RuleComponent = ({ rule, isLast }) => (
   <View style={isLast ? styles.ruleBoxLast : styles.ruleBox}>
     <View style={styles.ruleHeader}>
@@ -241,7 +248,7 @@ const PDFDocumentDesignerInterface = ({
               {specifications.map((spec) => (
                 <View key={spec.category_id} style={styles.infoItem}>
                   <View style={styles.infoRow}>
-                    <Text style={styles.label}>{spec.category_name}:</Text>
+                    <Text style={styles.label}>{spec.category_name} {metricValues?.[spec.category_name] || ''}:</Text>
                     <Text style={styles.value}>
                       {findSpecificationName(
                         spec.category_id,

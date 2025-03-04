@@ -51,12 +51,12 @@ const DeleteUser = ({ setActiveModal, isEditFlow }) => {
   React.useEffect(() => {
     getUsers();
   }, []);
-  console.log(usersList);
+  
   return (
     <Modal
       isOpen
       onClose={() => setActiveModal(null)}
-      title="Remove User"
+      title={isEditFlow ? 'Modify User' : "Remove User"}
       styleClass="max-w-[80vw]  max-h-[80vh]"
     >
       <div className="flex-1 overflow-hidden bg-white">

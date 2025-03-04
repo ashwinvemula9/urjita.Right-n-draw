@@ -724,6 +724,7 @@ const ApproverInterface = () => {
         isOpen={showApprovalModal}
         onClose={() => setShowApprovalModal(false)}
         title="Approval Confirmation"
+        styleClass='max-w-md'
       >
         <div className="p-6">
           <TextArea
@@ -761,6 +762,7 @@ const ApproverInterface = () => {
         isOpen={showRejectionModal}
         onClose={() => setShowRejectionModal(false)}
         title="Rejection Confirmation"
+        styleClass='max-w-md'
       >
         <div className="p-6">
           <TextArea
@@ -795,6 +797,7 @@ const ApproverInterface = () => {
           actionType === "approved" ? "Approved" : "Rejected"
         } Successfully`}
         closeOnOverlayClick={false}
+        styleClass='max-w-md'
       >
         <div className="p-6">
           <div className="flex flex-col items-center gap-4">
