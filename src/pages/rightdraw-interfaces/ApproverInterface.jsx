@@ -799,7 +799,7 @@ const ApproverInterface = () => {
         closeOnOverlayClick={false}
         styleClass='max-w-md'
       >
-        <div className="p-6">
+        <div className="p-6 ">
           <div className="flex flex-col items-center gap-4">
             <CheckCircle2 className="w-16 h-16 text-green-500" />
             <p className="text-lg text-center text-gray-700">

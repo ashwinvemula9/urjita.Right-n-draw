@@ -13,6 +13,7 @@ import {
   Button,
   Card,
   FormSection,
+  TextArea,
 } from "../../components/common/ReusableComponents";
 
 import { pcbAPI, componentsAPI, rulesAPI } from "../../services/api/endpoints";
@@ -25,6 +26,8 @@ import { saveAs } from "file-saver";
 import { pdf } from "@react-pdf/renderer";
 import { templateAPI } from "../../services/api/endpoints";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import Modal from "../../components/common/Modal";
+// import { Modal } from "@mui/material";
 
 // Constants
 const STEPS = {
@@ -105,9 +108,11 @@ const getErrorMessage = (specs) => {
 };
 
 const checkErrorMsg = (value) => {
-  if(["RF Essential","Connectorized"].includes(value)) return "This option is for Verification Module only"
+  if (["RF Essential", "Connectorized"].includes(value)) return "This selected option of 'Category for B14' is for Verification Module only"
   return null
 }
+
+let mapForNA = {}
 
 // Simplify the PCBSpecifications component
 const PCBSpecifications = ({
@@ -116,11 +121,17 @@ const PCBSpecifications = ({
   handleFieldChange,
   setSubCategoriesTwoSelections,
   subCategoriesTwoSelections,
+  setIsRemarksReq,
+  setCatB14,
+  catb14
 }) => {
   const [subCategoriesTwo, setSubCategoriesTwo] = useState({});
-  const [catb14,setCatB14] = useState('')
+  
 
-  const errorMessage = getErrorMessage(formData[STEPS.PCB_SPECS].selectedSpecs) || checkErrorMsg(catb14);
+
+  const errorMessage = getErrorMessage(formData[STEPS.PCB_SPECS].selectedSpecs);
+
+  const infoMsg =  checkErrorMsg(catb14)
 
   // Function to fetch sub-categories-two
   const fetchSubCategoriesTwo = async (subcategoryId) => {
@@ -154,6 +165,8 @@ const PCBSpecifications = ({
       }
     });
   }, [formData[STEPS.PCB_SPECS].selectedSpecs]);
+
+  
 
   return (
     <FormSection
@@ -190,8 +203,24 @@ const PCBSpecifications = ({
                     label: sub.name,
                   }))}
                   value={selectedSubcategoryId || ""}
-                  onChange={(value,label) => {
-                    setCatB14(label)
+                  onChange={(value, label) => {
+                    if ('na' === label.toLowerCase()) {
+                      setIsRemarksReq(true)
+                      mapForNA = {
+                        ...mapForNA,
+                        [spec.category_name] : label
+                      }
+                    }else{
+                      if(mapForNA?.[spec.category_name]){
+                        delete mapForNA[spec.category_name]
+                        if(!Object.keys(mapForNA).length){
+                          setIsRemarksReq(false)
+                        }
+                      }
+                    }
+                    if(spec.category_name === "Category for B14"){
+                      setCatB14(label)
+                    }
                     handleFieldChange(STEPS.PCB_SPECS, "selectedSpecs", {
                       ...formData[STEPS.PCB_SPECS].selectedSpecs,
                       [spec.category_id]: Number(value),
@@ -224,7 +253,7 @@ const PCBSpecifications = ({
                           )}
                           value={
                             subCategoriesTwoSelections[
-                              `${selectedSubcategoryId}`
+                            `${selectedSubcategoryId}`
                             ] || ""
                           }
                           onChange={(value) => {
@@ -246,12 +275,22 @@ const PCBSpecifications = ({
         );
       })}
 
+
+
       {/* Error message display */}
       {errorMessage && (
         <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-600 text-sm">{errorMessage}</p>
         </div>
       )}
+
+{infoMsg && (
+        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-600 text-sm">{infoMsg}</p>
+        </div>
+      )}
+
+      
     </FormSection>
   );
 };
@@ -264,6 +303,9 @@ const DesignerInterface = () => {
   const [subCategoriesTwoSelections, setSubCategoriesTwoSelections] = useState(
     {}
   );
+  const [isRemarksReq, setIsRemarksReq] = useState(false)
+  const [openRemarksModal,setOpenRemarksModal] = useState(false)
+  const [catb14, setCatB14] = useState('')
 
   // API Data State
   const [apiData, setApiData] = useState(initialApiDataState);
@@ -452,6 +494,7 @@ const DesignerInterface = () => {
         .filter(([_, isSelected]) => isSelected)
         .map(([id]) => id),
       secondarySubLevel: subCategoriesTwoSelections,
+      ...formData?.remarks && {remarks : formData.remarks}
     };
 
     try {
@@ -576,6 +619,9 @@ const DesignerInterface = () => {
         handleFieldChange={handleFieldChange}
         setSubCategoriesTwoSelections={setSubCategoriesTwoSelections}
         subCategoriesTwoSelections={subCategoriesTwoSelections}
+        setIsRemarksReq={setIsRemarksReq}
+        setCatB14={setCatB14}
+        catb14={catb14}
       />
     ),
 
@@ -599,7 +645,7 @@ const DesignerInterface = () => {
                     onClick={() => {
                       const newValue =
                         !formData[STEPS.DESIGN_RULES].selectedCheckboxes[
-                          option.design_option_id
+                        option.design_option_id
                         ];
                       handleFieldChange(
                         STEPS.DESIGN_RULES,
@@ -616,7 +662,7 @@ const DesignerInterface = () => {
                       className="h-5 w-5"
                       checked={
                         formData[STEPS.DESIGN_RULES].selectedCheckboxes[
-                          option.design_option_id
+                        option.design_option_id
                         ] || false
                       }
                       onChange={(e) => {
@@ -651,27 +697,27 @@ const DesignerInterface = () => {
                 {Object.values(
                   formData[STEPS.DESIGN_RULES].selectedCheckboxes
                 ).some(Boolean) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        checked={formData[STEPS.DESIGN_RULES].acknowledge}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            STEPS.DESIGN_RULES,
-                            "acknowledge",
-                            e.target.checked
-                          )
-                        }
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        I acknowledge and accept all the design rules specified
-                        above
-                      </span>
-                    </label>
-                  </div>
-                )}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={formData[STEPS.DESIGN_RULES].acknowledge}
+                          onChange={(e) =>
+                            handleFieldChange(
+                              STEPS.DESIGN_RULES,
+                              "acknowledge",
+                              e.target.checked
+                            )
+                          }
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          I acknowledge and accept all the design rules specified
+                          above
+                        </span>
+                      </label>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -687,10 +733,9 @@ const DesignerInterface = () => {
           <div
             className={`
               w-10 h-10 rounded-full flex items-center justify-center font-medium shadow-sm
-              ${
-                currentStep === index
-                  ? "bg-blue-600 text-white ring-4 ring-blue-100"
-                  : currentStep > index
+              ${currentStep === index
+                ? "bg-blue-600 text-white ring-4 ring-blue-100"
+                : currentStep > index
                   ? "bg-green-400 text-white"
                   : "bg-white border-2 border-gray-200 text-gray-400"
               }
@@ -799,6 +844,52 @@ const DesignerInterface = () => {
     }
   };
 
+  const RemarksModal = () => {
+    const [ value,setValue] = useState('')
+    return (
+    <Modal
+      isOpen
+      title="Remarks"
+      styleClass='max-w-md'
+    >
+      <div className="p-6">
+        <TextArea
+          label="Remarks"
+          value={value}
+          onChange={setValue}
+          multiline
+          required
+          placeholder="Remarks for NA selection"
+        />
+        <div className="flex justify-end gap-4 mt-6">
+          <Button
+            variant="secondary"
+            onClick={() => setOpenRemarksModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                remarks : value
+              }))
+              setCurrentStep((prev) => prev + 1)
+              setOpenRemarksModal(false)
+            }}
+            disabled={!value.trim()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </Modal>
+    )
+  }
+
+  console.log(isRemarksReq)
+
   return (
     <div className="min-h-screen bg-neutral-900 p-4 sm:p-8 md:p-16">
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 w-full max-w-7xl mx-auto">
@@ -862,7 +953,7 @@ const DesignerInterface = () => {
                               className="h-5 w-5"
                               checked={
                                 formData[STEPS.DESIGN_RULES].selectedCheckboxes[
-                                  option.design_option_id
+                                option.design_option_id
                                 ] || false
                               }
                               onChange={(e) => {
@@ -898,29 +989,29 @@ const DesignerInterface = () => {
                         {Object.values(
                           formData[STEPS.DESIGN_RULES].selectedCheckboxes
                         ).some(Boolean) && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <label className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                checked={
-                                  formData[STEPS.DESIGN_RULES].acknowledge
-                                }
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    STEPS.DESIGN_RULES,
-                                    "acknowledge",
-                                    e.target.checked
-                                  )
-                                }
-                              />
-                              <span className="text-sm font-medium text-gray-700">
-                                I acknowledge and accept all the design rules
-                                specified above
-                              </span>
-                            </label>
-                          </div>
-                        )}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <label className="flex items-center space-x-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  checked={
+                                    formData[STEPS.DESIGN_RULES].acknowledge
+                                  }
+                                  onChange={(e) =>
+                                    handleFieldChange(
+                                      STEPS.DESIGN_RULES,
+                                      "acknowledge",
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <span className="text-sm font-medium text-gray-700">
+                                  I acknowledge and accept all the design rules
+                                  specified above
+                                </span>
+                              </label>
+                            </div>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -966,15 +1057,22 @@ const DesignerInterface = () => {
               ) : (
                 <Button
                   variant="primary"
-                  onClick={
-                    currentStep === 0
-                      ? checkTemplateExistence
-                      : () => setCurrentStep((prev) => prev + 1)
-                  }
+                  onClick={() => {
+                    if(isRemarksReq){
+                      setOpenRemarksModal(true)
+                      return
+                    }
+                    if(currentStep === 0) {
+                      checkTemplateExistence()
+                    }else{
+                      setCurrentStep((prev) => prev + 1)
+                    }
+                    
+                  }}
                   disabled={
                     !isCurrentStepValid ||
                     checkingTemplate ||
-                    (currentStep === 0 && templateExists)
+                    (currentStep === 0 && templateExists) ||  checkErrorMsg(catb14)
                   }
                 >
                   {checkingTemplate ? (
@@ -998,6 +1096,7 @@ const DesignerInterface = () => {
         </div>
       </div>
       {submitted && <SuccessModal />}
+      {openRemarksModal && <RemarksModal/>}
     </div>
   );
 };
