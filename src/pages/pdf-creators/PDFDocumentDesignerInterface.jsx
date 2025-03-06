@@ -305,6 +305,7 @@ const PDFDocumentDesignerInterface = ({
               ))}
             </View>
           </View>
+          <Text style={styles.comments}>Comments: {formData.comments}</Text>
         </View>
 
         <Text
