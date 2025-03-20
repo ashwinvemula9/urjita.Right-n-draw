@@ -29,3 +29,25 @@ export const USER_COLS = [
     key: "full_name",
   },
 ];
+
+export const basicInfoFields = [
+  {
+    label: "OPP Number",
+    key: 'oppNumber'
+  }, {
+    label: "OPU Number",
+    key: 'opuNumber'
+  }, {
+    label: "EDU Number",
+    key: 'eduNumber'
+  }, {
+    label: "Model Name",
+    key: 'modelName'
+  }, {
+    label: "Part Number",
+    key: 'partNumber'
+  }, {
+    label: "Revision Number",
+    key: 'revisionNumber'
+  },
+]

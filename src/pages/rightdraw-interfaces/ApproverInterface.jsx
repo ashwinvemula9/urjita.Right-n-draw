@@ -7,7 +7,7 @@ import {
   FileText,
   Home,
 } from "lucide-react";
-import { approverAPI } from "../../services/api/endpoints";
+import { approverAPI, componentsAPI } from "../../services/api/endpoints";
 import {
   Button,
   Card,
@@ -21,6 +21,7 @@ import PageLayout from "../../components/layout/PageLayout";
 import generatePDF from "../../pages/pdf-creators/PDFDocumentApproverInterface";
 import { templateAPI } from "../../services/api/endpoints";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { basicInfoFields } from "../../constants";
 
 const UpdatedSelect = ({
   label,
@@ -82,7 +83,7 @@ const ApproverInterface = () => {
     modelName: "",
     partNumber: "",
     revisionNumber: "",
-    component: 1,
+    component: '',
   });
 
   const [templateData, setTemplateData] = useState(null);
@@ -99,6 +100,7 @@ const ApproverInterface = () => {
   const [actionType, setActionType] = useState("");
   const [templateExists, setTemplateExists] = useState(false);
   const [checkingTemplate, setCheckingTemplate] = useState(false);
+  const [components,setComponents] = useState([])
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -331,6 +333,16 @@ const ApproverInterface = () => {
     return requiredFields.every((field) => formData[field]);
   };
 
+  const fetchInitialData = React.useCallback(async () => {
+    try {
+      const res = await componentsAPI.getAll()
+      setComponents(res)
+    } catch (error) {
+      toast.error("Failed to load initial data");
+    }
+  }, []);
+
+
   const { isDesignFieldsDataAvailable, isVerifiedQueryDataAvailable } =
     React.useMemo(() => {
       return {
@@ -347,6 +359,7 @@ const ApproverInterface = () => {
   React.useEffect(() => {
     setApprovalComment("");
     setRejectionComment("");
+    fetchInitialData();
   }, []);
 
   return (
@@ -369,63 +382,17 @@ const ApproverInterface = () => {
             <div className="max-w-5xl mx-auto">
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  <div className="space-y-6">
+                    {basicInfoFields.map(itr => (
                     <Input
-                      label="OPP Number"
-                      value={formData.oppNumber}
+                      label={itr.label}
+                      value={formData[itr.key]}
                       onChange={(value) =>
-                        handleInputChange("oppNumber", value)
+                        handleInputChange(itr.key, value)
                       }
                       required
-                      placeholder="Enter OPP Number"
+                      placeholder={`Enter ${itr.label}`}
                     />
-                    <Input
-                      label="EDU Number"
-                      value={formData.eduNumber}
-                      onChange={(value) =>
-                        handleInputChange("eduNumber", value)
-                      }
-                      placeholder="Enter EDU Number"
-                    />
-                    <Input
-                      label="Part Number"
-                      value={formData.partNumber}
-                      onChange={(value) =>
-                        handleInputChange("partNumber", value)
-                      }
-                      required
-                      placeholder="Enter Part Number"
-                    />
-                  </div>
-                  <div className="space-y-6">
-                    <Input
-                      label="OPU Number"
-                      value={formData.opuNumber}
-                      onChange={(value) =>
-                        handleInputChange("opuNumber", value)
-                      }
-                      required
-                      placeholder="Enter OPU Number"
-                    />
-                    <Input
-                      label="Model Name"
-                      value={formData.modelName}
-                      onChange={(value) =>
-                        handleInputChange("modelName", value)
-                      }
-                      required
-                      placeholder="Enter Model Name"
-                    />
-                    <Input
-                      label="Revision Number"
-                      value={formData.revisionNumber}
-                      onChange={(value) =>
-                        handleInputChange("revisionNumber", value)
-                      }
-                      required
-                      placeholder="Enter Revision Number"
-                    />
-                  </div>
+                    ))}
                 </div>
 
                 <div>
@@ -434,7 +401,10 @@ const ApproverInterface = () => {
                     value={formData.component}
                     onChange={(value) => handleInputChange("component", value)}
                     required
-                    options={[{ value: 1, label: "B14" }]}
+                    options={components.map((each) => ({
+                      value: each.id,
+                      label: each.component_name,
+                    }))}
                     className="w-full md:w-1/2"
                   />
                 </div>

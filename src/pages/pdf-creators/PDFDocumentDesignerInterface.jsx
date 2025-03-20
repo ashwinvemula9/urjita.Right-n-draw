@@ -54,13 +54,15 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     fontSize: 8,
+    padding: '4px 0'
   },
   label: {
-    width: "40%",
+    width: "60%",
     color: "#64748b",
+    paddingRight: '6px'
   },
   value: {
-    width: "60%",
+    width: "40%",
     color: "#0f172a",
   },
   optionsContainer: {
@@ -159,11 +161,7 @@ const styles = StyleSheet.create({
 });
 
 
-const metricValues = {
-  "Dielectric Thickness" : '(Inches)',
-  "Copper Thickness" : '(OZ)',
-  "B14 Size" : '(Inches)'
-}
+
 
 const RuleComponent = ({ rule, isLast }) => (
   <View style={isLast ? styles.ruleBoxLast : styles.ruleBox}>
@@ -201,6 +199,14 @@ const PDFDocumentDesignerInterface = ({
     (option) => formData.designRules.selectedCheckboxes[option.design_option_id]
   );
 
+  const component = JSON.parse(localStorage.getItem('components')).find(comp => comp.id == formData.basicInfo.component).component_name
+
+  const metricValues = {
+    "Dielectric Thickness" : '(Inches)',
+    "Copper Thickness" : '(OZ)',
+    [`${component} Size`] : '(Inches)'
+  }
+
   // Helper function to find specification name by ID
   const findSpecificationName = (categoryId, specId) => {
     const category = specifications.find(
@@ -234,7 +240,7 @@ const PDFDocumentDesignerInterface = ({
                   <View style={styles.infoRow}>
                     <Text style={styles.label}>{BASIC_KEY_LABEL?.[key]}:</Text>
                     <Text style={styles.value}>
-                      {key.toLowerCase() === "component" ? "B14(PCB)" : value}
+                      {key.toLowerCase() === "component" ? `${component} (PCB)` : value}
                     </Text>
                   </View>
                 </View>

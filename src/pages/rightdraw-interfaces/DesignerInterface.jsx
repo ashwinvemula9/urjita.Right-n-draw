@@ -27,6 +27,7 @@ import { pdf } from "@react-pdf/renderer";
 import { templateAPI } from "../../services/api/endpoints";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import Modal from "../../components/common/Modal";
+import { basicInfoFields } from "../../constants";
 // import { Modal } from "@mui/material";
 
 // Constants
@@ -123,15 +124,16 @@ const PCBSpecifications = ({
   subCategoriesTwoSelections,
   setIsRemarksReq,
   setCatB14,
-  catb14
+  catb14, // selected subcat of catb14 will be stored in this to display the info msg.
+  fetchDesignOptions
 }) => {
   const [subCategoriesTwo, setSubCategoriesTwo] = useState({});
-  
+
 
 
   const errorMessage = getErrorMessage(formData[STEPS.PCB_SPECS].selectedSpecs);
 
-  const infoMsg =  checkErrorMsg(catb14)
+  const infoMsg = checkErrorMsg(catb14)
 
   // Function to fetch sub-categories-two
   const fetchSubCategoriesTwo = async (subcategoryId) => {
@@ -166,7 +168,14 @@ const PCBSpecifications = ({
     });
   }, [formData[STEPS.PCB_SPECS].selectedSpecs]);
 
-  
+
+  const checkDesignOptions = (cat,subCat) => {
+    const subCatObj  = cat.subcategories.find(itr => itr?.name === subCat)
+    if(subCatObj?.is_design_options_exists){
+      fetchDesignOptions(subCatObj?.id)
+    }
+  }
+
 
   return (
     <FormSection
@@ -204,21 +213,22 @@ const PCBSpecifications = ({
                   }))}
                   value={selectedSubcategoryId || ""}
                   onChange={(value, label) => {
+                    checkDesignOptions(spec,label)
                     if ('na' === label.toLowerCase()) {
                       setIsRemarksReq(true)
                       mapForNA = {
                         ...mapForNA,
-                        [spec.category_name] : label
+                        [spec.category_name]: label
                       }
-                    }else{
-                      if(mapForNA?.[spec.category_name]){
+                    } else {
+                      if (mapForNA?.[spec.category_name]) {
                         delete mapForNA[spec.category_name]
-                        if(!Object.keys(mapForNA).length){
+                        if (!Object.keys(mapForNA).length) {
                           setIsRemarksReq(false)
                         }
                       }
                     }
-                    if(spec.category_name === "Category for B14"){
+                    if (spec.category_name === "Category for B14") {
                       setCatB14(label)
                     }
                     handleFieldChange(STEPS.PCB_SPECS, "selectedSpecs", {
@@ -284,13 +294,13 @@ const PCBSpecifications = ({
         </div>
       )}
 
-{infoMsg && (
+      {infoMsg && (
         <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-600 text-sm">{infoMsg}</p>
         </div>
       )}
 
-      
+
     </FormSection>
   );
 };
@@ -304,7 +314,7 @@ const DesignerInterface = () => {
     {}
   );
   const [isRemarksReq, setIsRemarksReq] = useState(false)
-  const [openRemarksModal,setOpenRemarksModal] = useState(false)
+  const [openRemarksModal, setOpenRemarksModal] = useState(false)
   const [catb14, setCatB14] = useState('')
 
   // API Data State
@@ -346,18 +356,17 @@ const DesignerInterface = () => {
     setErrors((prev) => ({ ...prev, initialData: null }));
 
     try {
-      const [specs, components] = await Promise.all([
-        pcbAPI.getSpecification(1, "designer"),
+      const [components] = await Promise.all([
         componentsAPI.getAll(),
       ]);
 
-      if (!specs || !components) {
+      if (!components) {
         throw new Error("Failed to load initial data");
       }
 
       setApiData((prev) => ({
         ...prev,
-        specifications: specs,
+        // specifications: specs,
         components,
       }));
     } catch (err) {
@@ -376,7 +385,7 @@ const DesignerInterface = () => {
       const response = await rulesAPI.getDesignOptions(id);
       setApiData((prev) => ({
         ...prev,
-        designOptions: response,
+        designOptions: [...prev.designOptions,...response],
       }));
     } catch (error) {
       console.error("Error fetching design options:", error);
@@ -415,10 +424,6 @@ const DesignerInterface = () => {
     fetchInitialData();
   }, []);
 
-  useEffect(() => {
-    if (formData[STEPS.PCB_SPECS].selectedSpecs[1])
-      fetchDesignOptions(formData[STEPS.PCB_SPECS].selectedSpecs[1]);
-  }, [formData[STEPS.PCB_SPECS].selectedSpecs[1]]);
 
   useEffect(() => {
     if (currentStep === 2) {
@@ -494,7 +499,7 @@ const DesignerInterface = () => {
         .filter(([_, isSelected]) => isSelected)
         .map(([id]) => id),
       secondarySubLevel: subCategoriesTwoSelections,
-      ...formData?.remarks && {remarks : formData.remarks}
+      ...formData?.remarks && { remarks: formData.remarks }
     };
 
     try {
@@ -550,62 +555,33 @@ const DesignerInterface = () => {
     navigate("/");
   };
 
+
+
   const StepContent = {
     [STEPS.BASIC_INFO]: () => (
       <FormSection title="Basic Information">
-        <Input
-          label="OPP Number"
-          value={formData[STEPS.BASIC_INFO].oppNumber}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "oppNumber", value)
-          }
-          required
-        />
-        <Input
-          label="OPU Number"
-          value={formData[STEPS.BASIC_INFO].opuNumber}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "opuNumber", value)
-          }
-          required
-        />
-        <Input
-          label="EDU Number"
-          value={formData[STEPS.BASIC_INFO].eduNumber}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "eduNumber", value)
-          }
-        />
-        <Input
-          label="Model Name"
-          value={formData[STEPS.BASIC_INFO].modelName}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "modelName", value)
-          }
-          required
-        />
-        <Input
-          label="Part Number"
-          value={formData[STEPS.BASIC_INFO].partNumber}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "partNumber", value)
-          }
-          required
-        />
-        <Input
-          label="Revision Number"
-          value={formData[STEPS.BASIC_INFO].revisionNumber}
-          onChange={(value) =>
-            handleFieldChange(STEPS.BASIC_INFO, "revisionNumber", value)
-          }
-          required
-        />
+        {basicInfoFields.map(field => (
+          <Input
+            key={field.key}
+            label={field.label}
+            value={formData[STEPS.BASIC_INFO][field.key]}
+            onChange={(value) =>
+              handleFieldChange(STEPS.BASIC_INFO, field.key, value)
+            }
+            required
+          />
+        ))}
+
         <Select
           label="Component"
-          options={[{ value: 1, label: "B14" }]}
+          options={apiData.components.map(itr => ({
+            label: itr.component_name, value: itr.id
+          }))}
           value={formData[STEPS.BASIC_INFO].component}
-          onChange={(value) =>
+          onChange={(value) => {
+            console.log(value)
             handleFieldChange(STEPS.BASIC_INFO, "component", value)
+          }
           }
           required
         />
@@ -622,6 +598,7 @@ const DesignerInterface = () => {
         setIsRemarksReq={setIsRemarksReq}
         setCatB14={setCatB14}
         catb14={catb14}
+        fetchDesignOptions={fetchDesignOptions}
       />
     ),
 
@@ -835,7 +812,14 @@ const DesignerInterface = () => {
         setTemplateExists(true);
         toast.error("A template with these details already exists!");
       } else {
+        const res = await pcbAPI.getSpecification(formData[STEPS.BASIC_INFO]?.component, "designer")
+        console.log(res)
+        setApiData((prev) => ({
+          ...prev,
+          specifications: res,
+        }));
         setCurrentStep((prev) => prev + 1);
+
       }
     } catch (error) {
       toast.error(error.message);
@@ -845,46 +829,46 @@ const DesignerInterface = () => {
   };
 
   const RemarksModal = () => {
-    const [ value,setValue] = useState('')
+    const [value, setValue] = useState('')
     return (
-    <Modal
-      isOpen
-      title="Remarks"
-      styleClass='max-w-md'
-    >
-      <div className="p-6">
-        <TextArea
-          label="Remarks"
-          value={value}
-          onChange={setValue}
-          multiline
-          required
-          placeholder="Remarks for NA selection"
-        />
-        <div className="flex justify-end gap-4 mt-6">
-          <Button
-            variant="secondary"
-            onClick={() => setOpenRemarksModal(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setFormData(prev => ({
-                ...prev,
-                remarks : value
-              }))
-              setCurrentStep((prev) => prev + 1)
-              setOpenRemarksModal(false)
-            }}
-            disabled={!value.trim()}
-          >
-            Next
-          </Button>
+      <Modal
+        isOpen
+        title="Remarks"
+        styleClass='max-w-md'
+      >
+        <div className="p-6">
+          <TextArea
+            label="Remarks"
+            value={value}
+            onChange={setValue}
+            multiline
+            required
+            placeholder="Remarks for NA selection"
+          />
+          <div className="flex justify-end gap-4 mt-6">
+            <Button
+              variant="secondary"
+              onClick={() => setOpenRemarksModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  remarks: value
+                }))
+                setCurrentStep((prev) => prev + 1)
+                setOpenRemarksModal(false)
+              }}
+              disabled={!value.trim()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
     )
   }
 
@@ -1058,21 +1042,21 @@ const DesignerInterface = () => {
                 <Button
                   variant="primary"
                   onClick={() => {
-                    if(isRemarksReq){
+                    if (isRemarksReq) {
                       setOpenRemarksModal(true)
                       return
                     }
-                    if(currentStep === 0) {
+                    if (currentStep === 0) {
                       checkTemplateExistence()
-                    }else{
+                    } else {
                       setCurrentStep((prev) => prev + 1)
                     }
-                    
+
                   }}
                   disabled={
                     !isCurrentStepValid ||
                     checkingTemplate ||
-                    (currentStep === 0 && templateExists) ||  checkErrorMsg(catb14)
+                    (currentStep === 0 && templateExists) || checkErrorMsg(catb14)
                   }
                 >
                   {checkingTemplate ? (
@@ -1096,7 +1080,7 @@ const DesignerInterface = () => {
         </div>
       </div>
       {submitted && <SuccessModal />}
-      {openRemarksModal && <RemarksModal/>}
+      {openRemarksModal && <RemarksModal />}
     </div>
   );
 };

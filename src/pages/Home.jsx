@@ -23,7 +23,6 @@ const Home = () => {
 
   const features = getFeatures(user);
 
-  console.log({ features });
 
   return user ? (
     <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800">

@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     fontSize: 8,
+    padding: '4px 0'
   },
   resultItem: {
     marginBottom: 5,
@@ -117,6 +118,7 @@ const PDFDocumentApproverInterface = ({
   userEmail,
 }) => {
   const timestamp = new Date().toLocaleString();
+  const component = JSON.parse(localStorage.getItem('components')).find(comp => comp.id == formData.basicInfo.component).component_name
 
   // Add null checks and default to empty arrays if data is missing
   const deviatedDesignFields =
@@ -173,7 +175,7 @@ const PDFDocumentApproverInterface = ({
                 <View style={styles.infoRow}>
                   <Text style={styles.itemName}>{BASIC_KEY_LABEL[key]}: </Text>
                   <Text style={styles.itemValue}>
-                    {key.toLowerCase() === "component" ? "B14(PCB)" : value}
+                    {key.toLowerCase() === "component" ? `${component} (PCB)` : value}
                   </Text>
                 </View>
               </View>

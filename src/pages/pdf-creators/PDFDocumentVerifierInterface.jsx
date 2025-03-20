@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     fontSize: 8,
+    padding: '4px 0'
   },
   resultItem: {
     marginBottom: 5,
@@ -102,6 +103,8 @@ const PDFDocumentVerifierInterface = ({
   verifyResults,
   specifications,
 }) => {
+
+  const component = JSON.parse(localStorage.getItem('components')).find(comp => comp.id == formData.basicInfo.component).component_name
   // Helper function to find specification name and value
   const getSpecificationDetails = (categoryId, value) => {
     const spec = specifications.find(
@@ -170,7 +173,7 @@ const PDFDocumentVerifierInterface = ({
                     {BASIC_KEY_LABEL?.[key]}:{" "}
                   </Text>
                   <Text style={styles.itemValue}>
-                    {key.toLowerCase() === "component" ? "B14(PCB)" : value}
+                    {key.toLowerCase() === "component" ? `${component} (PCB)` : value}
                   </Text>
                 </View>
               </View>
