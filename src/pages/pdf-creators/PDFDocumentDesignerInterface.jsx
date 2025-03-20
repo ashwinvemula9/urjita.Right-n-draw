@@ -254,7 +254,10 @@ const PDFDocumentDesignerInterface = ({
               {specifications.map((spec) => (
                 <View key={spec.category_id} style={styles.infoItem}>
                   <View style={styles.infoRow}>
-                    <Text style={styles.label}>{spec.category_name} {metricValues?.[spec.category_name] || ''}:</Text>
+                    <Text style={styles.label}>
+                      {spec.category_name}{" "}
+                      {metricValues?.[spec.category_name] || ""}:
+                    </Text>
                     <Text style={styles.value}>
                       {findSpecificationName(
                         spec.category_id,
@@ -298,6 +301,7 @@ const PDFDocumentDesignerInterface = ({
               ))}
             </View>
           </View>
+          <Text style={styles.comments}>Remarks: {formData.remarks}</Text>
         </View>
 
         <Text
