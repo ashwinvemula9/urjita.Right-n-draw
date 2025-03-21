@@ -118,7 +118,7 @@ const PDFDocumentApproverInterface = ({
   userEmail,
 }) => {
   const timestamp = new Date().toLocaleString();
-  const component = JSON.parse(localStorage.getItem('components')).find(comp => comp.id == formData.basicInfo.component).component_name
+  const component = JSON.parse(localStorage.getItem('components')).find(comp => comp.id == formData.component).component_name
 
   // Add null checks and default to empty arrays if data is missing
   const deviatedDesignFields =
