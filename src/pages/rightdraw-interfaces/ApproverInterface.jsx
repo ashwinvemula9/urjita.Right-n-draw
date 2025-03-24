@@ -692,7 +692,7 @@ const ApproverInterface = () => {
 
       <Modal
         isOpen={showApprovalModal}
-        onClose={() => setShowApprovalModal(false)}
+        // onClose={() => setShowApprovalModal(false)}
         title="Approval Confirmation"
         styleClass='max-w-md'
       >
@@ -730,7 +730,7 @@ const ApproverInterface = () => {
 
       <Modal
         isOpen={showRejectionModal}
-        onClose={() => setShowRejectionModal(false)}
+        // onClose={() => setShowRejectionModal(false)}
         title="Rejection Confirmation"
         styleClass='max-w-md'
       >
