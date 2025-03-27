@@ -762,7 +762,6 @@ const ApproverInterface = () => {
 
       <Modal
         isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
         title={`Template ${
           actionType === "approved" ? "Approved" : "Rejected"
         } Successfully`}
